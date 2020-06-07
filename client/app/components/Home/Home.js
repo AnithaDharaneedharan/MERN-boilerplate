@@ -1,49 +1,61 @@
-import React, { Component } from 'react';
-import 'whatwg-fetch';
+import React, { Component } from "react";
+import "whatwg-fetch";
+import { getFromStorage, setInStorage } from "../../utils/storage";
 
 class Home extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      counters: []
+      isLoading: true,
+      token: "",
+      signUpError: "",
+      signInError: "",
+      masterError: ""
     };
-
-    this.newCounter = this.newCounter.bind(this);
-    this.incrementCounter = this.incrementCounter.bind(this);
-    this.decrementCounter = this.decrementCounter.bind(this);
-    this.deleteCounter = this.deleteCounter.bind(this);
-
-    this._modifyCounter = this._modifyCounter.bind(this);
   }
 
   componentDidMount() {
-    fetch('/api/counters')
-      .then(res => res.json())
-      .then(json => {
-        this.setState({
-          counters: json
+    const token = getFromStorage("the_main_app");
+    if (token) {
+      //VERIFY TOKEN
+      fetch("/api/account/verify?token=" + token)
+        .then(res => res.json())
+        .then(json => {
+          if (json.success) {
+            this.setState({
+              token: token,
+              isLoading: false
+            });
+          } else {
+            this.setState({
+              isLoading: false
+            });
+          }
         });
+    } else {
+      this.setState({
+        isLoading: false
       });
+    }
   }
 
   newCounter() {
-    fetch('/api/counters', { method: 'POST' })
-      .then(res => res.json())
-      .then(json => {
-        let data = this.state.counters;
-        data.push(json);
-
-        this.setState({
-          counters: data
-        });
-      });
+    // fetch('/api/counters', { method: 'POST' })
+    //   .then(res => res.json())
+    //   .then(json => {
+    //     let data = this.state.counters;
+    //     data.push(json);
+    //     this.setState({
+    //       counters: data
+    //     });
+    //   });
   }
 
   incrementCounter(index) {
     const id = this.state.counters[index]._id;
 
-    fetch(`/api/counters/${id}/increment`, { method: 'PUT' })
+    fetch(`/api/counters/${id}/increment`, { method: "PUT" })
       .then(res => res.json())
       .then(json => {
         this._modifyCounter(index, json);
@@ -53,7 +65,7 @@ class Home extends Component {
   decrementCounter(index) {
     const id = this.state.counters[index]._id;
 
-    fetch(`/api/counters/${id}/decrement`, { method: 'PUT' })
+    fetch(`/api/counters/${id}/decrement`, { method: "PUT" })
       .then(res => res.json())
       .then(json => {
         this._modifyCounter(index, json);
@@ -63,10 +75,9 @@ class Home extends Component {
   deleteCounter(index) {
     const id = this.state.counters[index]._id;
 
-    fetch(`/api/counters/${id}`, { method: 'DELETE' })
-      .then(_ => {
-        this._modifyCounter(index, null);
-      });
+    fetch(`/api/counters/${id}`, { method: "DELETE" }).then(_ => {
+      this._modifyCounter(index, null);
+    });
   }
 
   _modifyCounter(index, data) {
@@ -84,23 +95,28 @@ class Home extends Component {
   }
 
   render() {
+    const { isLoading } = this.state;
+    if (isLoading) {
+      return (
+        <div>
+          <p>Loading...</p>
+        </div>
+      );
+    }
+
+    if (!token) {
+      return (
+        <div>
+          <p>Sign up</p>
+          <p>Sign In</p>
+        </div>
+      );
+    }
+
     return (
-      <>
-        <p>Counters:</p>
-
-        <ul>
-          { this.state.counters.map((counter, i) => (
-            <li key={i}>
-              <span>{counter.count} </span>
-              <button onClick={() => this.incrementCounter(i)}>+</button>
-              <button onClick={() => this.decrementCounter(i)}>-</button>
-              <button onClick={() => this.deleteCounter(i)}>x</button>
-            </li>
-          )) }
-        </ul>
-
-        <button onClick={this.newCounter}>New counter</button>
-      </>
+      <div>
+        <p>Account</p>
+      </div>
     );
   }
 }
