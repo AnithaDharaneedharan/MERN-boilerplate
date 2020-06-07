@@ -11,13 +11,37 @@ class Home extends Component {
       token: "",
       signUpError: "",
       signInError: "",
-      masterError: ""
+      masterError: "",
+      signInEmail: "",
+      signInPassword: "",
+      signUpEmail: "",
+      signUpPassword: "",
+      signUpFirstName: "",
+      signUpLastName: ""
     };
+    this.onTextBoxChangeSignInEmail = this.onTextBoxChangeSignInEmail.bind(
+      this
+    );
+    this.onTextBoxChangeSignInPassword = this.onTextBoxChangeSignInPassword.bind(
+      this
+    );
+    this.onTextBoxChangeSignUpEmail = this.onTextBoxChangeSignUpEmail.bind(
+      this
+    );
+    this.onTextBoxChangeSignUpFirstName = this.onTextBoxChangeSignUpFirstName.bind(
+      this
+    );
+    this.onTextBoxChangeSignUpLastName = this.onTextBoxChangeSignUpLastName.bind(
+      this
+    );
+    this.onTextBoxChangeSignUpPassword = this.onTextBoxChangeSignUpPassword.bind(
+      this
+    );
   }
 
   componentDidMount() {
     const token = getFromStorage("the_main_app");
-    if (token) {
+    if (!token) {
       //VERIFY TOKEN
       fetch("/api/account/verify?token=" + token)
         .then(res => res.json())
@@ -40,6 +64,42 @@ class Home extends Component {
     }
   }
 
+  onTextBoxChangeSignInEmail(event) {
+    this.setState({
+      signInEmail: event.target.value
+    });
+  }
+
+  onTextBoxChangeSignUpEmail(event) {
+    this.setState({
+      signUpEmail: event.target.value
+    });
+  }
+
+  onTextBoxChangeSignInPassword(event) {
+    this.setState({
+      signInEmail: event.target.value
+    });
+  }
+
+  onTextBoxChangeSignUpFirstName(event) {
+    this.setState({
+      signUpFirstName: event.target.value
+    });
+  }
+
+  onTextBoxChangeSignUpLastName(event) {
+    this.setState({
+      signUpLastName: event.target.value
+    });
+  }
+
+  onTextBoxChangeSignUpPassword(event) {
+    this.setState({
+      signUpPassword: event.target.value
+    });
+  }
+
   newCounter() {
     // fetch('/api/counters', { method: 'POST' })
     //   .then(res => res.json())
@@ -52,48 +112,6 @@ class Home extends Component {
     //   });
   }
 
-  incrementCounter(index) {
-    const id = this.state.counters[index]._id;
-
-    fetch(`/api/counters/${id}/increment`, { method: "PUT" })
-      .then(res => res.json())
-      .then(json => {
-        this._modifyCounter(index, json);
-      });
-  }
-
-  decrementCounter(index) {
-    const id = this.state.counters[index]._id;
-
-    fetch(`/api/counters/${id}/decrement`, { method: "PUT" })
-      .then(res => res.json())
-      .then(json => {
-        this._modifyCounter(index, json);
-      });
-  }
-
-  deleteCounter(index) {
-    const id = this.state.counters[index]._id;
-
-    fetch(`/api/counters/${id}`, { method: "DELETE" }).then(_ => {
-      this._modifyCounter(index, null);
-    });
-  }
-
-  _modifyCounter(index, data) {
-    let prevData = this.state.counters;
-
-    if (data) {
-      prevData[index] = data;
-    } else {
-      prevData.splice(index, 1);
-    }
-
-    this.setState({
-      counters: prevData
-    });
-  }
-
   render() {
     const { isLoading } = this.state;
     if (isLoading) {
@@ -104,12 +122,56 @@ class Home extends Component {
       );
     }
 
-    if (!token) {
+    if (token) {
+      console.log("enter");
       return (
-        <div>
-          <p>Sign up</p>
-          <p>Sign In</p>
-        </div>
+        <>
+          <div>
+            {" "}
+            {signInError ? <p>{signInError}</p> : null}
+            <p>Sign In</p>
+            <label>Email:</label>
+            <input type="email" placeholder="Email" value={signInEmail} onChange={this.onTextBoxChangeSignInEmail}></input>
+            <br />
+            <input
+              type="password"
+              placeholder="Password"
+              value={signInPassword}
+              onChange={this.onTextBoxChangeSignInPassword}
+            ></input>
+            <br />
+            <button>Sign In</button>
+          </div>
+          <br /> <br />
+          <div>
+            <p>Sign Up</p>
+            <label>Email:</label>
+            <input
+              type="text"
+              placeholder="First Name"
+              value={signUpFirstName}
+              onChange={this.onTextBoxChangeSignUpFirstName}
+            ></input>
+            <br />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={signUpLastName}
+              onChange={this.onTextBoxChangeSignUpLastName}
+            ></input>
+            <br />
+            <input type="email" placeholder="Email" value={signUpEmail}></input>
+            <br />
+            <input
+              type="password"
+              placeholder="Password"
+              value={signUpPassword}
+              onChange={this.onTextBoxChangeSignUpPassword}
+            ></input>
+            <br />
+            <button>Sign Up</button>
+          </div>
+        </>
       );
     }
 

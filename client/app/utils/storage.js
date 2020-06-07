@@ -1,4 +1,3 @@
-import { json } from "express";
 
 export function getFromStorage(key) {
     if(!key) {
