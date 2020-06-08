@@ -9,6 +9,7 @@ module.exports = app => {
     let { email } = body;
 
     if (!firstName) {
+      console.log(firstName)
       return res.send({
         success: false,
         message: "Error: First name cannot be blank"
@@ -84,7 +85,6 @@ module.exports = app => {
       });
     }
     User.find({ email: email }, (err, users) => {
-      console.log("err1", err);
       if (err) {
         return res.send({ success: false, message: "Error: server error" });
       }
@@ -99,7 +99,6 @@ module.exports = app => {
       const userSession = new UserSession();
       userSession.userId = user._id;
       userSession.save((err, doc) => {
-        console.log("err2", err);
         if (err) {
           return res.send({ success: false, message: "Error: Server error" });
         }
@@ -154,7 +153,6 @@ module.exports = app => {
       null,
       (err, sessions) => {
         if (err) {
-          console.log(err);
           return res.send({
             success: false,
             message: "sever error"

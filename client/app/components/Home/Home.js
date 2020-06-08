@@ -19,6 +19,8 @@ class Home extends Component {
       signUpFirstName: "",
       signUpLastName: ""
     };
+
+    this.setState({ isLoading: true });
     this.onTextBoxChangeSignInEmail = this.onTextBoxChangeSignInEmail.bind(
       this
     );
@@ -42,9 +44,11 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    const token = getFromStorage("the_main_app");
+    const obj = getFromStorage("the_main_app");
+  
 
-    if (token) {
+    if (obj && obj.token) {
+      const { token } = obj;
       //VERIFY TOKEN
       fetch("/api/account/verify?token=" + token)
         .then(res => res.json())
@@ -81,7 +85,7 @@ class Home extends Component {
 
   onTextBoxChangeSignInPassword(event) {
     this.setState({
-      signInEmail: event.target.value
+      signInPassword: event.target.value
     });
   }
 
@@ -105,7 +109,33 @@ class Home extends Component {
 
   onSignIn() {
     // grab state
+    const { signInEmail, signInPassword } = this.state;
     // post request to backend
+    fetch("/api/account/signin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: signInEmail,
+        password: signInPassword,
+      })
+    })
+      .then(res => res.json())
+      .then(json => {
+        if (json.success) {
+          setInStorage('the_main_app', {token: json.token})
+          this.setState({
+            signInError: json.message,
+            isLoading: false,
+            signInEmail: "",
+            signInPassword: "",
+            token: json.token
+          });
+        } else {
+          this.setState({ signInError: json.message, isLoading: false });
+        }
+      });
   }
 
   onSignUp() {
@@ -117,8 +147,11 @@ class Home extends Component {
       signUpPassword
     } = this.state;
     // post request to backend
-    fetch("/api/counters", {
+    fetch("/api/account/signup", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         firstName: signUpFirstName,
         lastName: signUpLastName,
@@ -129,7 +162,16 @@ class Home extends Component {
       .then(res => res.json())
       .then(json => {
         if (json.success) {
-          this.setState({ signUpError: json.message });
+          this.setState({
+            signUpError: json.message,
+            isLoading: false,
+            signUpEmail: "",
+            signUpFirstName: "",
+            signUpLastName: "",
+            signUpPassword: ""
+          });
+        } else {
+          this.setState({ signUpError: json.message, isLoading: false });
         }
       });
   }
@@ -163,7 +205,7 @@ class Home extends Component {
         <>
           <div>
             {" "}
-            {signInError ? <p>{signInError}</p> : null}
+            {signInError ? <p>{signInError}</p> : `Signed IN`}
             <p>Sign In</p>
             <label>Email:</label>
             <input
@@ -173,6 +215,7 @@ class Home extends Component {
               onChange={this.onTextBoxChangeSignInEmail}
             ></input>
             <br />
+            <label>Password:</label>
             <input
               type="password"
               placeholder="Password"
@@ -184,8 +227,9 @@ class Home extends Component {
           </div>
           <br /> <br />
           <div>
+            {signUpError ? <p>{signUpError}</p> : `Signed Up`}
             <p>Sign Up</p>
-            <label>Email:</label>
+            <label>First Name:</label>
             <input
               type="text"
               placeholder="First Name"
@@ -193,6 +237,7 @@ class Home extends Component {
               onChange={this.onTextBoxChangeSignUpFirstName}
             ></input>
             <br />
+            <label>Last Name :</label>
             <input
               type="text"
               placeholder="Last Name"
@@ -200,6 +245,7 @@ class Home extends Component {
               onChange={this.onTextBoxChangeSignUpLastName}
             ></input>
             <br />
+            <label>Email:</label>
             <input
               type="email"
               placeholder="Email"
@@ -207,6 +253,7 @@ class Home extends Component {
               onChange={this.onTextBoxChangeSignUpEmail}
             ></input>
             <br />
+            <label>Password:</label>
             <input
               type="password"
               placeholder="Password"
