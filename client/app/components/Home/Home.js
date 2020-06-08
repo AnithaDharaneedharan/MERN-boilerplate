@@ -37,11 +37,14 @@ class Home extends Component {
     this.onTextBoxChangeSignUpPassword = this.onTextBoxChangeSignUpPassword.bind(
       this
     );
+    this.onSignIn = this.onSignIn.bind(this);
+    this.onSignUp = this.onSignUp.bind(this);
   }
 
   componentDidMount() {
     const token = getFromStorage("the_main_app");
-    if (!token) {
+
+    if (token) {
       //VERIFY TOKEN
       fetch("/api/account/verify?token=" + token)
         .then(res => res.json())
@@ -100,20 +103,52 @@ class Home extends Component {
     });
   }
 
-  newCounter() {
-    // fetch('/api/counters', { method: 'POST' })
-    //   .then(res => res.json())
-    //   .then(json => {
-    //     let data = this.state.counters;
-    //     data.push(json);
-    //     this.setState({
-    //       counters: data
-    //     });
-    //   });
+  onSignIn() {
+    // grab state
+    // post request to backend
+  }
+
+  onSignUp() {
+    //grab state
+    const {
+      signUpEmail,
+      signUpFirstName,
+      signUpLastName,
+      signUpPassword
+    } = this.state;
+    // post request to backend
+    fetch("/api/counters", {
+      method: "POST",
+      body: JSON.stringify({
+        firstName: signUpFirstName,
+        lastName: signUpLastName,
+        email: signUpEmail,
+        password: signUpPassword
+      })
+    })
+      .then(res => res.json())
+      .then(json => {
+        if (json.success) {
+          this.setState({ signUpError: json.message });
+        }
+      });
   }
 
   render() {
-    const { isLoading } = this.state;
+    const {
+      isLoading,
+      token,
+      signUpError,
+      signInError,
+      masterError,
+      signInEmail,
+      signInPassword,
+      signUpEmail,
+      signUpPassword,
+      signUpFirstName,
+      signUpLastName
+    } = this.state;
+
     if (isLoading) {
       return (
         <div>
@@ -122,7 +157,7 @@ class Home extends Component {
       );
     }
 
-    if (token) {
+    if (!token) {
       console.log("enter");
       return (
         <>
@@ -131,7 +166,12 @@ class Home extends Component {
             {signInError ? <p>{signInError}</p> : null}
             <p>Sign In</p>
             <label>Email:</label>
-            <input type="email" placeholder="Email" value={signInEmail} onChange={this.onTextBoxChangeSignInEmail}></input>
+            <input
+              type="email"
+              placeholder="Email"
+              value={signInEmail}
+              onChange={this.onTextBoxChangeSignInEmail}
+            ></input>
             <br />
             <input
               type="password"
@@ -140,7 +180,7 @@ class Home extends Component {
               onChange={this.onTextBoxChangeSignInPassword}
             ></input>
             <br />
-            <button>Sign In</button>
+            <button onClick={this.onSignIn}>Sign In</button>
           </div>
           <br /> <br />
           <div>
@@ -160,7 +200,12 @@ class Home extends Component {
               onChange={this.onTextBoxChangeSignUpLastName}
             ></input>
             <br />
-            <input type="email" placeholder="Email" value={signUpEmail}></input>
+            <input
+              type="email"
+              placeholder="Email"
+              value={signUpEmail}
+              onChange={this.onTextBoxChangeSignUpEmail}
+            ></input>
             <br />
             <input
               type="password"
@@ -169,7 +214,7 @@ class Home extends Component {
               onChange={this.onTextBoxChangeSignUpPassword}
             ></input>
             <br />
-            <button>Sign Up</button>
+            <button onClick={this.onSignUp}>Sign Up</button>
           </div>
         </>
       );
