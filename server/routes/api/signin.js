@@ -60,7 +60,7 @@ module.exports = app => {
         }
         return res.send({
           success: true,
-          message: `${user} Signed up`
+          message: `${user.firstName} ${user.lastName} Signed up`
         });
       });
     });
